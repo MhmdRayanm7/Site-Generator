@@ -3,7 +3,7 @@ from textnode import TextNode, TextType
 
 
 class TestTextNode(unittest.TestCase):
-    
+    #Text node tests "5"
     def test_eq(self):
 
         node = TextNode("This is a text node", TextType.BOLD)

@@ -1,5 +1,5 @@
 import unittest
-from textnode import TextNode, TextType , text_node_to_html_node
+from textnode import TextNode, TextType , text_node_to_html_node , split_nodes_delimiter
 
 
 
@@ -115,6 +115,62 @@ class TestTextNode(unittest.TestCase):
 
         with self.assertRaises(Exception):
             text_node_to_html_node(node)
+            
+            
+    #Split Delimiter "4"
+
+    def test_split_code(self):
+        node = TextNode(
+            "This is text with a `code block` word",
+            TextType.TEXT,
+        )
+
+        result = split_nodes_delimiter([node], "`", TextType.CODE)
+
+        expected = [
+            TextNode("This is text with a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" word", TextType.TEXT),
+        ]
+
+        self.assertEqual(result, expected)
+
+
+    def test_split_multiple_bold(self):
+        node = TextNode(
+            "This is **bold** and this is **also bold**",
+            TextType.TEXT,
+        )
+
+        result = split_nodes_delimiter([node], "**", TextType.BOLD)
+
+        expected = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" and this is ", TextType.TEXT),
+            TextNode("also bold", TextType.BOLD),
+        ]
+
+        self.assertEqual(result, expected)
+
+
+    def test_non_text_node_is_not_split(self):
+        node = TextNode("already bold", TextType.BOLD)
+
+        result = split_nodes_delimiter([node], "**", TextType.BOLD)
+
+        self.assertEqual(result, [node])
+        self.assertIs(result[0], node)
+
+
+    def test_missing_closing_delimiter(self):
+        node = TextNode(
+            "This has an `unclosed code block",
+            TextType.TEXT,
+        )
+
+        with self.assertRaises(Exception):
+            split_nodes_delimiter([node], "`", TextType.CODE)
     
     
 if __name__ == "__main__":

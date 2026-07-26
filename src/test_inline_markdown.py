@@ -7,6 +7,7 @@ from inline_markdown import (
     split_nodes_link,
     extract_markdown_images,
     extract_markdown_links,
+    text_to_textnodes ,
 )
 
 # Extract Links '5'
@@ -209,3 +210,81 @@ class TestInlineMarkdown(unittest.TestCase):
         new_nodes = split_nodes_link([node])
 
         self.assertListEqual([node], new_nodes)
+    
+    # Text to Textnodes "5"
+        
+    def test_text_to_textnodes_full(self):
+        text = (
+            "This is **text** with an _italic_ word and a `code block` "
+            "and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) "
+            "and a [link](https://boot.dev)"
+        )
+
+        result = text_to_textnodes(text)
+
+        expected = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode(
+                "obi wan image",
+                TextType.IMAGE,
+                "https://i.imgur.com/fJRm4Vk.jpeg",
+            ),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://boot.dev"),
+        ]
+
+        self.assertListEqual(expected, result)
+
+
+    def test_text_to_textnodes_plain_text(self):
+        result = text_to_textnodes("This is normal text")
+
+        expected = [
+            TextNode("This is normal text", TextType.TEXT),
+        ]
+
+        self.assertListEqual(expected, result)
+
+
+    def test_text_to_textnodes_multiple_bold(self):
+        result = text_to_textnodes(
+            "This is **bold** and **also bold**"
+        )
+
+        expected = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("bold", TextType.BOLD),
+            TextNode(" and ", TextType.TEXT),
+            TextNode("also bold", TextType.BOLD),
+        ]
+
+        self.assertListEqual(expected, result)
+
+
+    def test_text_to_textnodes_image_and_link(self):
+        result = text_to_textnodes(
+            "![cat](cat.png) and [website](https://example.com)"
+        )
+
+        expected = [
+            TextNode("cat", TextType.IMAGE, "cat.png"),
+            TextNode(" and ", TextType.TEXT),
+            TextNode(
+                "website",
+                TextType.LINK,
+                "https://example.com",
+            ),
+        ]
+
+        self.assertListEqual(expected, result)
+
+
+    def test_text_to_textnodes_unclosed_delimiter(self):
+        with self.assertRaises(Exception):
+            text_to_textnodes("This is **not closed")

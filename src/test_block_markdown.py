@@ -5,6 +5,7 @@ from block_markdown import (
     BlockType,
     block_to_block_type,
     markdown_to_html_node,
+    extract_title,
 )
 
 
@@ -265,6 +266,53 @@ def test_lists_to_html(self):
         "<ol><li>First ordered item</li><li>Second <code>ordered</code> item</li></ol>"
         "</div>",
     )
+    
+# Extract Title '4'
+
+def test_extract_title(self):
+    markdown = "# Hello"
+
+    self.assertEqual(
+        extract_title(markdown),
+        "Hello",
+    )
+
+
+def test_extract_title_with_spaces(self):
+    markdown = "#     My Website     "
+
+    self.assertEqual(
+        extract_title(markdown),
+        "My Website",
+    )
+
+
+def test_extract_title_from_full_markdown(self):
+    markdown = """
+## Smaller heading
+
+Some text
+
+# Main Title
+
+More text
+"""
+
+    self.assertEqual(
+        extract_title(markdown),
+        "Main Title",
+    )
+
+
+def test_extract_title_missing(self):
+    markdown = """
+## Not an H1
+
+This is a paragraph
+"""
+
+    with self.assertRaises(Exception):
+        extract_title(markdown)
 
 
 

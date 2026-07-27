@@ -1,5 +1,6 @@
 
 from textnode import TextNode, TextType
+from block_markdown import markdown_to_html_node , extract_title
 import os
 import shutil
 
@@ -14,7 +15,7 @@ def copy_directory(source, destination):
     items = os.listdir(source)
 
     for item in items:
-        # Build the full destination , source path for the current item
+        # Build the full destination , s path for the current item
         source_path = os.path.join(source, item)
         destination_path = os.path.join(destination, item)
         
@@ -30,13 +31,41 @@ def copy_directory(source, destination):
         print(f"Source: {source_path}")
         print(f"Destination: {destination_path}")
 
+def generate_page(from_path, template_path, dest_path):
+    print(
+    f"Generating page from {from_path} "
+    f"to {dest_path} using {template_path}")
+    
+    with open(from_path, "r", encoding="utf-8") as file:
+        markdown = file.read()
 
+    with open(template_path, "r", encoding="utf-8") as temp:
+        template = temp.read()
+        
+    html = markdown_to_html_node(markdown) 
+    html_content = html.to_html()
+    title = extract_title(markdown)
 
+    full_page = template.replace("{{ Title }}", title)
+    full_page = full_page.replace("{{ Content }}", html_content)
+    
+    name = os.path.dirname(dest_path)
+
+    if name != "":
+        os.makedirs(name, exist_ok=True)
+        
+    with open(dest_path, "w", encoding="utf-8") as file:
+        dest_path = file.write(full_page)
 
 def main():
     node = TextNode("Hello, World!", TextType.TEXT, url="https://example.com")
     print(node)
     copy_static("static", "public")
+    generate_page(
+        "content/index.md",
+        "template.html",
+        "public/index.html",
+    )
 
 
 if __name__ == "__main__":

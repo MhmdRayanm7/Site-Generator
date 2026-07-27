@@ -56,15 +56,34 @@ def generate_page(from_path, template_path, dest_path):
         
     with open(dest_path, "w", encoding="utf-8") as file:
         dest_path = file.write(full_page)
+        
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    en = os.listdir(dir_path_content)
+
+    for e in en:
+        content_path = os.path.join(dir_path_content, e)
+        destination_path = os.path.join(dest_dir_path, e)
+
+        if os.path.isdir(content_path):
+            generate_pages_recursive(
+                content_path,
+                template_path,
+                destination_path,
+            )
+
+        elif e.endswith(".md"):
+            html_name = os.path.splitext(e)[0] + ".html"
+            html_path = os.path.join(dest_dir_path, html_name)
+
+            generate_page(content_path ,template_path ,html_path,)               
 
 def main():
-    node = TextNode("Hello, World!", TextType.TEXT, url="https://example.com")
-    print(node)
     copy_static("static", "public")
-    generate_page(
-        "content/index.md",
+
+    generate_pages_recursive(
+        "content",
         "template.html",
-        "public/index.html",
+        "public",
     )
 
 

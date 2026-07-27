@@ -14,6 +14,7 @@ def copy_directory(source, destination):
     items = os.listdir(source)
 
     for item in items:
+        # Build the full destination , source path for the current item
         source_path = os.path.join(source, item)
         destination_path = os.path.join(destination, item)
         
